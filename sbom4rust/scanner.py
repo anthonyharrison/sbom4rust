@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+
 import toml
-from operator import itemgetter
 
 
 class CargoScanner:
@@ -27,7 +27,7 @@ class CargoScanner:
         self.dependency_file = os.path.join(dependency_directory, self.LOCK_FILE)
         self.module_valid = False
         if self.debug:
-            print (f"Process {self.dependency_file}")
+            print(f"Process {self.dependency_file}")
         if os.path.exists(self.dependency_file):
             # Load data from file
             with open(os.path.abspath(self.dependency_file), "r") as file_handle:
@@ -37,7 +37,7 @@ class CargoScanner:
         return self.LOCK_FILE
 
     def show_module(self):
-        print (self.module_data)
+        print(self.module_data)
 
     def process_dependency(self):
         # If file not found, no metadata returned
@@ -45,15 +45,25 @@ class CargoScanner:
             self.metadata = {}
             self.module_valid = True
             # Find all packages
-            for entry in self.module_data['package']:
-                self.add([self.DEFAULT_PARENT, entry['name'], entry['version'], self.DEFAULT_AUTHOR, self.DEFAULT_LICENCE])
-            # Add dependencies afterwards so that all modules are defined before dependencies resolved
-            for entry in self.module_data['package']:
-                if 'dependencies' in entry:
-                    for dep in entry['dependencies']:
+            for entry in self.module_data["package"]:
+                self.add(
+                    [
+                        self.DEFAULT_PARENT,
+                        entry["name"],
+                        entry["version"],
+                        self.DEFAULT_AUTHOR,
+                        self.DEFAULT_LICENCE,
+                    ]
+                )
+            # Add dependencies afterwards so that all modules are defined
+            # before dependencies resolved
+            for entry in self.module_data["package"]:
+                if "dependencies" in entry:
+                    for dep in entry["dependencies"]:
                         dep_version = self.VERSION_UNKNOWN
                         dep_package = None
-                        # Dep could specify version e.g. package version. If not get dep version
+                        # Dep could specify version e.g. package version.
+                        # If not get dep version from module
                         if " " in dep:
                             # Version specified
                             dep_package, dep_version = dep.split(" ")
@@ -63,10 +73,17 @@ class CargoScanner:
                                 dep_version = package[2]
                                 dep_package = dep
                         if dep_package is not None:
-                            self.add([entry['name'], dep_package, dep_version, self.DEFAULT_AUTHOR,
-                                  self.DEFAULT_LICENCE])
+                            self.add(
+                                [
+                                    entry["name"],
+                                    dep_package,
+                                    dep_version,
+                                    self.DEFAULT_AUTHOR,
+                                    self.DEFAULT_LICENCE,
+                                ]
+                            )
         elif self.debug:
-            print (f"[ERROR] File {self.dependency_file} not found")
+            print(f"[ERROR] File {self.dependency_file} not found")
 
     def add(self, entry):
         if entry not in self.record:

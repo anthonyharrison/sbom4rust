@@ -13,7 +13,6 @@ from sbom4python.output import SBOMOutput
 from sbom4rust.scanner import CargoScanner
 from sbom4rust.version import VERSION
 
-
 # CLI processing
 
 
@@ -58,7 +57,7 @@ def main(argv=None):
         action="store",
         default="tag",
         choices=["tag", "json"],
-        help="specify format of SPDX software bill of materials (sbom) (default: tag)",
+        help="format for SPDX software bill of materials (sbom) (default: tag)",
     )
 
     output_group.add_argument(
@@ -101,7 +100,6 @@ def main(argv=None):
         # Assume current directory
         dependency_location = os.getcwd()
 
-
     if args["sbom"] == "spdx":
         bom_format = args["format"]
     else:
@@ -120,7 +118,7 @@ def main(argv=None):
     sbom_scan.process_dependency()
 
     if args["debug"]:
-        print ("Valid module", sbom_scan.valid_module())
+        print("Valid module", sbom_scan.valid_module())
         sbom_scan.show_record()
 
     # If file not found, abort processing
@@ -128,7 +126,9 @@ def main(argv=None):
         return -1
 
     # Generate SBOM file
-    sbom_gen = SBOMGenerator(False, args["sbom"], args["format"], app_name, VERSION, "cargo")
+    sbom_gen = SBOMGenerator(
+        False, args["sbom"], args["format"], app_name, VERSION, "cargo"
+    )
 
     sbom_out = SBOMOutput(args["output_file"], bom_format)
 
@@ -146,6 +146,7 @@ def main(argv=None):
         dot_out.generate_output(sbom_dot.getDOT())
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

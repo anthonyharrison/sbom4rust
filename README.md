@@ -44,8 +44,7 @@ Output:
   --sbom {spdx,cyclonedx}
                         specify type of software bill of materials (sbom) to
                         generate (default: spdx)
-  --format {tag,json}   specify format of SPDX software bill of materials
-                        (sbom) (default: tag)
+  --format {tag,json}   format for SPDX software bill of materials (sbom) (default: tag)
   -o OUTPUT_FILE, --output-file OUTPUT_FILE
                         output filename (default: output to stdout)
   -g GRAPH, --graph GRAPH
