@@ -20,6 +20,7 @@ class CargoScanner:
     def __init__(self, debug):
         self.record = []
         self.cargo_file = None
+        self.module_data = {}
         self.debug = debug
 
     def set_dependency_file(self, dependency_directory):
@@ -27,9 +28,10 @@ class CargoScanner:
         self.module_valid = False
         if self.debug:
             print (f"Process {self.dependency_file}")
-        # Load data from file
-        with open(os.path.abspath(self.dependency_file), "r") as file_handle:
-            self.module_data = toml.load(file_handle)
+        if os.path.exists(self.dependency_file):
+            # Load data from file
+            with open(os.path.abspath(self.dependency_file), "r") as file_handle:
+                self.module_data = toml.load(file_handle)
 
     def get_name(self):
         return self.LOCK_FILE
@@ -49,7 +51,6 @@ class CargoScanner:
             for entry in self.module_data['package']:
                 if 'dependencies' in entry:
                     for dep in entry['dependencies']:
-                        #print ("\t", dep)
                         dep_version = self.VERSION_UNKNOWN
                         dep_package = None
                         # Dep could specify version e.g. package version. If not get dep version
@@ -65,7 +66,7 @@ class CargoScanner:
                             self.add([entry['name'], dep_package, dep_version, self.DEFAULT_AUTHOR,
                                   self.DEFAULT_LICENCE])
         elif self.debug:
-            print (f"File {self.dependency_file} not found")
+            print (f"[ERROR] File {self.dependency_file} not found")
 
     def add(self, entry):
         if entry not in self.record:

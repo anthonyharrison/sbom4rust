@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
+import os
 import sys
 import textwrap
 from collections import ChainMap
@@ -19,8 +20,9 @@ from sbom4rust.version import VERSION
 def main(argv=None):
 
     argv = argv or sys.argv
+    app_name = "sbom4rust"
     parser = argparse.ArgumentParser(
-        prog="sbom4rust",
+        prog=app_name,
         description=textwrap.dedent(
             """
             SBOM4Rust generates a Software Bill of Materials for the
@@ -95,6 +97,11 @@ def main(argv=None):
 
     dependency_location = args["dependency"]
 
+    if dependency_location == "":
+        # Assume current directory
+        dependency_location = os.getcwd()
+
+
     if args["sbom"] == "spdx":
         bom_format = args["format"]
     else:
@@ -112,12 +119,17 @@ def main(argv=None):
     sbom_scan.set_dependency_file(dependency_location)
     sbom_scan.process_dependency()
 
+    if args["debug"]:
+        print ("Valid module", sbom_scan.valid_module())
+        sbom_scan.show_record()
+
     # If file not found, abort processing
     if not sbom_scan.valid_module():
         return -1
 
     # Generate SBOM file
-    sbom_gen = SBOMGenerator(False, args["sbom"], args["format"])
+    sbom_gen = SBOMGenerator(False, args["sbom"], args["format"], app_name, VERSION, "cargo")
+
     sbom_out = SBOMOutput(args["output_file"], bom_format)
 
     if args["sbom"] == "spdx":

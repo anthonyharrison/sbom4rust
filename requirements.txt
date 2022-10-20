@@ -1,1 +1,1 @@
-sbom4python
+sbom4python>=0.3.0
