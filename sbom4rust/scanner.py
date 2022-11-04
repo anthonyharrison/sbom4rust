@@ -17,7 +17,7 @@ class CargoScanner:
     VERSION_UNKNOWN = "NA"
     LOCK_FILE = "Cargo.lock"
 
-    def __init__(self, debug, application = ""):
+    def __init__(self, debug, application=""):
         self.record = []
         self.packages = []
         self.cargo_file = None
@@ -78,7 +78,7 @@ class CargoScanner:
                                 dep_version = package[2]
                             dep_package = dep
                         if dep_package is not None:
-                            self.add_entry(entry["name"],dep_package,dep_version)
+                            self.add_entry(entry["name"], dep_package, dep_version)
         elif self.debug:
             print(f"[ERROR] File {self.dependency_file} not found")
 
@@ -92,7 +92,7 @@ class CargoScanner:
                 return package
         return None
 
-    def add_entry (self, parent, name, version):
+    def add_entry(self, parent, name, version):
         if self.debug:
             print(f"Add entry {name} {version}")
         self.add(
