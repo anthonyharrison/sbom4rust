@@ -37,6 +37,13 @@ def main(argv=None):
         default="",
         help="Directory containing Cargo.lock dependency file",
     )
+    input_group.add_argument(
+        "-a",
+        "--application",
+        action="store",
+        default="",
+        help="Name of application",
+    )
 
     output_group = parser.add_argument_group("Output")
     output_group.add_argument(
@@ -80,6 +87,7 @@ def main(argv=None):
 
     defaults = {
         "dependency": "",
+        "application": "",
         "exclude_license": False,
         "output_file": "",
         "sbom": "spdx",
@@ -112,8 +120,9 @@ def main(argv=None):
         print("Output file", args["output_file"])
         print("Graph file", args["graph"])
         print("Directory", dependency_location)
+        print("Application", args["application"])
 
-    sbom_scan = CargoScanner(args["debug"])
+    sbom_scan = CargoScanner(args["debug"], args["application"])
     sbom_scan.set_dependency_file(dependency_location)
     sbom_scan.process_dependency()
 
