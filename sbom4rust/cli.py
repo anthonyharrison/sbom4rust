@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Anthony Harrison
+# Copyright (C) 2023 Anthony Harrison
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
@@ -7,9 +7,9 @@ import sys
 import textwrap
 from collections import ChainMap
 
-from sbom4python.dotgenerator import DOTGenerator
-from sbom4python.generator import SBOMGenerator
-from sbom4python.output import SBOMOutput
+from lib4sbom.generator import SBOMGenerator
+from lib4sbom.sbom import SBOM
+
 from sbom4rust.scanner import CargoScanner
 from sbom4rust.version import VERSION
 
@@ -63,7 +63,7 @@ def main(argv=None):
         "--format",
         action="store",
         default="tag",
-        choices=["tag", "json"],
+        choices=["tag", "json", "yaml"],
         help="format for SPDX software bill of materials (sbom) (default: tag)",
     )
 
@@ -73,14 +73,6 @@ def main(argv=None):
         action="store",
         default="",
         help="output filename (default: output to stdout)",
-    )
-
-    output_group.add_argument(
-        "-g",
-        "--graph",
-        action="store",
-        default="",
-        help="filename for dependency graph",
     )
 
     parser.add_argument("-V", "--version", action="version", version=VERSION)
@@ -93,7 +85,6 @@ def main(argv=None):
         "sbom": "spdx",
         "debug": False,
         "format": "tag",
-        "graph": "",
     }
 
     raw_args = parser.parse_args(argv[1:])
@@ -112,6 +103,10 @@ def main(argv=None):
         bom_format = args["format"]
     else:
         bom_format = "json"
+
+    if args["application"] == "":
+        print("[ERROR] Application name must be specified.")
+        return -1
 
     if args["debug"]:
         print("SBOM type", args["sbom"])
@@ -135,24 +130,19 @@ def main(argv=None):
         return -1
 
     # Generate SBOM file
+
+    rust_sbom = SBOM()
+    rust_sbom.add_packages(sbom_scan.get_packages())
+    rust_sbom.add_relationships(sbom_scan.get_relationships())
+
     sbom_gen = SBOMGenerator(
-        False, args["sbom"], args["format"], app_name, VERSION, "cargo"
+        sbom_type=args["sbom"], format=bom_format, application=app_name, version=VERSION
     )
-
-    sbom_out = SBOMOutput(args["output_file"], bom_format)
-
-    if args["sbom"] == "spdx":
-        sbom_gen.generate_spdx(sbom_scan.get_name(), sbom_scan.get_record())
-        sbom_out.generate_output(sbom_gen.get_spdx())
-    else:
-        sbom_gen.generate_cyclonedx(sbom_scan.get_name(), sbom_scan.get_record())
-        sbom_out.generate_output(sbom_gen.get_cyclonedx())
-
-    if len(args["graph"]) > 0:
-        sbom_dot = DOTGenerator()
-        sbom_dot.generatedot(sbom_gen.get_relationships())
-        dot_out = SBOMOutput(args["graph"], "dot")
-        dot_out.generate_output(sbom_dot.getDOT())
+    sbom_gen.generate(
+        project_name=args["application"],
+        sbom_data=rust_sbom.get_sbom(),
+        filename=args["output_file"],
+    )
 
     return 0
 

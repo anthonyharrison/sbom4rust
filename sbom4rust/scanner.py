@@ -1,9 +1,11 @@
-# Copyright (C) 2022 Anthony Harrison
+# Copyright (C) 2023 Anthony Harrison
 # SPDX-License-Identifier: Apache-2.0
 
 import os
 
 import toml
+from lib4sbom.data.package import SBOMPackage
+from lib4sbom.data.relationship import SBOMRelationship
 
 
 class CargoScanner:
@@ -24,6 +26,10 @@ class CargoScanner:
         self.module_data = {}
         self.debug = debug
         self.application = application
+        self.rust_package = SBOMPackage()
+        self.rust_relationship = SBOMRelationship()
+        self.rust_packages = {}
+        self.rust_relationships = []
 
     def set_dependency_file(self, dependency_directory):
         self.dependency_file = os.path.join(dependency_directory, self.LOCK_FILE)
@@ -44,15 +50,15 @@ class CargoScanner:
         print(self.module_data)
 
     def process_dependency(self):
-        # If file not found, no metadata returned
+        # If file not found, no metadata to process
         if len(self.module_data) > 0:
             self.metadata = {}
             self.module_valid = True
             # Find all packages
             for entry in self.module_data["package"]:
                 self.packages.append([entry["name"], entry["version"]])
-                if self.application == "" or entry["name"] == self.application:
-                    self.add_entry(self.DEFAULT_PARENT, entry["name"], entry["version"])
+                # if self.application == "" or entry["name"] == self.application:
+                self.add_entry(self.DEFAULT_PARENT, entry["name"], entry["version"])
 
             # Add dependencies afterwards so that all modules are defined
             # before dependencies resolved
@@ -66,13 +72,14 @@ class CargoScanner:
                         if " " in dep:
                             # Version specified
                             dep_package, dep_version = dep.split(" ")
-                            if self.get_package(dep_package) is None:
-                                # Need to add package
-                                dep_version = self.add_package(dep)
+                            # if self.get_package(dep_package, dep_version) is None:
+                            #     # Need to add package
+                            #     dep_version = self.add_package(dep)
                         else:
                             package = self.get_package(dep)
                             if package is None:
                                 # Need to add package
+                                print(f"[ERROR] Unknown package {dep} found")
                                 dep_version = self.add_package(dep)
                             else:
                                 dep_version = package[2]
@@ -86,15 +93,17 @@ class CargoScanner:
         if entry not in self.record:
             self.record.append(entry)
 
-    def get_package(self, name):
+    def get_package(self, name, version=None):
         for package in self.record:
-            if name == package[1]:
+            if version is None and name == package[1]:
+                return package
+            elif name == package[1] and version == package[2]:
                 return package
         return None
 
     def add_entry(self, parent, name, version):
         if self.debug:
-            print(f"Add entry {name} {version}")
+            print(f"Add entry {parent} - {name} {version}")
         self.add(
             [
                 parent,
@@ -104,18 +113,30 @@ class CargoScanner:
                 self.DEFAULT_LICENCE,
             ]
         )
-
-    def add_package(self, name):
-        if self.debug:
-            print(f"Add package {name}")
-        for package in self.packages:
-            if name == package[0]:
-                self.add_entry(self.DEFAULT_PARENT, name, package[1])
-                return package[1]
-        return None
+        self.rust_package.initialise()
+        self.rust_package.set_name(name)
+        self.rust_package.set_version(version)
+        self.rust_package.set_licenseconcluded(self.DEFAULT_LICENCE)
+        self.rust_package.set_licensedeclared(self.DEFAULT_LICENCE)
+        self.rust_package.set_supplier("UNKNOWN", self.DEFAULT_AUTHOR)
+        self.rust_packages[(name, version)] = self.rust_package.get_package()
+        # Record relationship
+        if parent != self.DEFAULT_PARENT:
+            self.rust_relationship.initialise()
+            self.rust_relationship.set_relationship(parent, "DEPENDS_ON", name)
+            self.rust_relationship.set_relationship_id(
+                None, self.rust_package.get_value("id")
+            )
+            self.rust_relationships.append(self.rust_relationship.get_relationship())
 
     def get_record(self):
         return self.record
+
+    def get_packages(self):
+        return self.rust_packages
+
+    def get_relationships(self):
+        return self.rust_relationships
 
     def valid_module(self):
         return self.module_valid

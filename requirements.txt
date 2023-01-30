@@ -1,1 +1,2 @@
-sbom4python>=0.3.0
+lib4sbom
+toml

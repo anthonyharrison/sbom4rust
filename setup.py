@@ -19,7 +19,7 @@ setup_kwargs = dict(
     author_email='anthony.p.harrison@gmail.com',
     maintainer='Anthony Harrison',
     maintainer_email='anthony.p.harrison@gmail.com',
-    license='Apache_2.0',
+    license='Apache-2.0',
     keywords=["security", "tools", "SBOM", "DevSecOps", "SPDX", "CycloneDX", "Rust"],
     install_requires=requirements,
     classifiers=[
@@ -32,6 +32,7 @@ setup_kwargs = dict(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
