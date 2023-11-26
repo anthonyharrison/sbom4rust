@@ -119,7 +119,6 @@ class CargoScanner:
         self.rust_package.set_version(version)
         self.rust_package.set_licenseconcluded(self.DEFAULT_LICENCE)
         self.rust_package.set_licensedeclared(self.DEFAULT_LICENCE)
-        self.rust_package.set_supplier("UNKNOWN", self.DEFAULT_AUTHOR)
         self.rust_packages[(name, version)] = self.rust_package.get_package()
         # Record relationship
         if parent != self.DEFAULT_PARENT:
