@@ -115,7 +115,7 @@ class CargoScanner:
         )
         self.rust_package.initialise()
         self.rust_package.set_name(name)
-        self.sbom_package.set_property("language", "Rust")
+        self.rust_package.set_property("language", "Rust")
         self.rust_package.set_version(version)
         self.rust_package.set_licenseconcluded(self.DEFAULT_LICENCE)
         self.rust_package.set_licensedeclared(self.DEFAULT_LICENCE)
