@@ -113,7 +113,6 @@ def main(argv=None):
         if args["sbom"] == "spdx":
             print("Format", bom_format)
         print("Output file", args["output_file"])
-        print("Graph file", args["graph"])
         print("Directory", dependency_location)
         print("Application", args["application"])
 
