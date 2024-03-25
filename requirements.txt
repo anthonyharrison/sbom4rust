@@ -1,2 +1,3 @@
-lib4sbom >= 0.4.0
+lib4sbom >= 0.7.0
 toml
+lib4package
