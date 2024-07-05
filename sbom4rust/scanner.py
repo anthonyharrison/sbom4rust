@@ -160,16 +160,19 @@ class CargoScanner:
         homepage = self.package_metadata.get_homepage()
         download_location = self.package_metadata.get_downloadlocation()
         self.rust_package.set_filesanalysis(False)
-        if len(originator.split()) > 3:
-            self.rust_package.set_supplier(
-                "Organization", self._format_supplier(originator)
-            )
-        elif len(originator) > 1:
-            if self.debug:
-                print (f"{originator} => {self._format_supplier(originator)}")
-            self.rust_package.set_supplier(
-                "Person", self._format_supplier(originator)
-            )
+        if originator is not None:
+            if len(originator.split()) > 3:
+                self.rust_package.set_supplier(
+                    "Organization", self._format_supplier(originator)
+                )
+            elif len(originator) > 1:
+                if self.debug:
+                    print (f"{originator} => {self._format_supplier(originator)}")
+                self.rust_package.set_supplier(
+                    "Person", self._format_supplier(originator)
+                )
+            else:
+                self.rust_package.set_supplier("UNKNOWN", "NOASSERTION")
         else:
             self.rust_package.set_supplier("UNKNOWN", "NOASSERTION")
         if package_licence is not None:
