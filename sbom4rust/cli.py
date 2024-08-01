@@ -7,6 +7,7 @@ import sys
 import textwrap
 from collections import ChainMap
 
+from lib4sbom.data.document import SBOMDocument
 from lib4sbom.generator import SBOMGenerator
 from lib4sbom.sbom import SBOM
 
@@ -17,7 +18,6 @@ from sbom4rust.version import VERSION
 
 
 def main(argv=None):
-
     argv = argv or sys.argv
     app_name = "sbom4rust"
     parser = argparse.ArgumentParser(
@@ -128,9 +128,14 @@ def main(argv=None):
     if not sbom_scan.valid_module():
         return -1
 
+    # Lifecycle is always pre-build
+    sbom_document = SBOMDocument()
+    sbom_document.set_value("lifecycle", "build")
+
     # Generate SBOM file
 
     rust_sbom = SBOM()
+    rust_sbom.add_document(sbom_document.get_document())
     rust_sbom.add_packages(sbom_scan.get_packages())
     rust_sbom.add_relationships(sbom_scan.get_relationships())
 
