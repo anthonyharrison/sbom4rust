@@ -3,13 +3,14 @@
 
 import os
 import re
-import toml
 import unicodedata
 
+import toml
+from lib4package.metadata import Metadata
 from lib4sbom.data.package import SBOMPackage
 from lib4sbom.data.relationship import SBOMRelationship
 from lib4sbom.license import LicenseScanner
-from lib4package.metadata import Metadata
+
 
 class CargoScanner:
     """
@@ -34,7 +35,7 @@ class CargoScanner:
         self.rust_packages = {}
         self.rust_relationships = []
         self.license = LicenseScanner()
-        self.package_metadata = Metadata("rust", debug = self.debug)
+        self.package_metadata = Metadata("rust", debug=self.debug)
 
     def set_dependency_file(self, dependency_directory):
         self.dependency_file = os.path.join(dependency_directory, self.LOCK_FILE)
@@ -122,7 +123,7 @@ class CargoScanner:
             names = [name_str]
         # Get email addresses
         if self.debug:
-            print (f"{supplier_info} => {name_str} => {names}")
+            print(f"{supplier_info} => {name_str} => {names}")
         # Use RFC-5322 compliant regex (https://regex101.com/library/6EL6YF)
         emails = re.findall(
             r"((?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))",
@@ -167,7 +168,7 @@ class CargoScanner:
                 )
             elif len(originator) > 1:
                 if self.debug:
-                    print (f"{originator} => {self._format_supplier(originator)}")
+                    print(f"{originator} => {self._format_supplier(originator)}")
                 self.rust_package.set_supplier(
                     "Person", self._format_supplier(originator)
                 )
@@ -178,7 +179,7 @@ class CargoScanner:
         if package_licence is not None:
             license = self.license.find_license(package_licence)
             if self.debug:
-                print (f"{package_licence} => {license}")
+                print(f"{package_licence} => {license}")
             # Report license as reported by metadata. If not valid SPDX, report NOASSERTION
             if license != package_licence:
                 self.rust_package.set_licensedeclared("NOASSERTION")
