@@ -152,6 +152,7 @@ class CargoScanner:
         self.rust_package.set_name(name)
         self.rust_package.set_property("language", "Rust")
         self.rust_package.set_version(version)
+        self.rust_package.set_evidence(self.dependency_file)
         # Enrich package data
         self.package_metadata.get_package(name)
         checksum = self.package_metadata.get_checksum(version=version)
