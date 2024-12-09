@@ -154,7 +154,10 @@ class CargoScanner:
         self.rust_package.set_version(version)
         self.rust_package.set_evidence(self.dependency_file)
         # Enrich package data
-        self.package_metadata.get_package(name)
+        self.package_metadata.get_package(name, version=version)
+        self.rust_package.set_value(
+            "release_date", self.package_metadata.get_latest_release_time()
+        )
         checksum, checksum_algorithm = self.package_metadata.get_checksum(version=version)
         originator = self.package_metadata.get_originator()
         description = self.package_metadata.get_description()
